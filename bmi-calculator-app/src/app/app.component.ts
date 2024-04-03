@@ -1,29 +1,43 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { BmiService } from '../services/bmi.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-
 export class AppComponent {
-  title = 'bmi-calculator-app';
-  name: string = '';
-  age: number = 0;
-  weight: number = 0;
-  height: number = 0;
-  bmi: number = 0;
+  bmi: number | null = null; // Initialize bmi property to null
+  weight: number | null = null; // Property to store weight
+  height: number | null = null; // Property to store height
 
-  constructor(private http: HttpClient) { }
+  constructor(private bmiService: BmiService) { }
 
   calculateBMI() {
-    const userData = {
-      name: this.name,
-      age: this.age,
-      weight: this.weight,
-      height: this.height
-    };
+    // Ensure weight and height are valid numbers
+    if (this.weight === null || this.height === null || isNaN(this.weight) || isNaN(this.height) || this.weight <= 0 || this.height <= 0) {
+      console.error('Invalid weight or height');
+      return; // Exit early if weight or height is invalid
+    }
 
+    // Calculate BMI using weight and height
+    this.bmiService.calculateBmi(this.weight, this.height).subscribe(
+      (response) => {
+        // Extract the BMI value from the response object and assign it to the bmi variable
+        this.bmi = response.bmi;
+      },
+      (error) => {
+        console.error('Error calculating BMI:', error);
+      }
+    );
+  }
+
+  // Get the BMI value or provide a default value if bmi is null
+  getBmiValue(): number {
+    if (this.bmi === null) {
+      console.error('BMI is null');
+      return 0; // Provide a default value if bmi is null
+    }
+    return this.bmi;
   }
 }
